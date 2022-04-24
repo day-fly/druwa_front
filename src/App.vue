@@ -34,47 +34,33 @@
     <q-page-container>
       <q-tabs
           v-model="tab"
-          outside-arrows
-          mobile-arrows
           indicator-color="black"
-          class="bg-orange-6 text-white shadow-2"
+          class="bg-purple-9 text-white shadow-2"
           dense
           align="justify"
       >
 
-        <q-tab class="bg-purple-9" icon="coffee" name="coffee" label="커피"></q-tab>
-        <q-tab class="bg-purple-9" icon="local_drink" name="drink" label="음료"></q-tab>
-        <q-tab class="bg-purple-9" icon="icecream" name="dessert" label="디저트"></q-tab>
-        <q-tab class="bg-purple-9" icon="more_horiz" name="etc" label="기타"></q-tab>
+        <template v-for="menu in menu1Levels" :key="menu.id">
+          <q-tab class="bg-purple-9" :name="menu.name" :icon="menu.icon" :label="menu.label"></q-tab>
+        </template>
+
       </q-tabs>
 
       <q-tab-panels v-model="tab" animated>
-        <q-tab-panel name="coffee">
+        <q-tab-panel v-for="menu in menu1Levels" :name="menu.name" :key="menu.id">
           <div class="q-pa-md row items-start q-gutter-md">
-          <q-card class="my-card" @click="selectMenu">
+          <q-card v-for="subMenu in menu2Levels.filter((obj) => obj.parentId === menu.id)" :key="subMenu.id" class="my-card" @click="selectMenu">
             <q-img src="./images/coffee.jpg">
 <!--              <div class="absolute-bottom text-weight-bolder">-->
 <!--                아메리카노[ICE]-->
 <!--              </div>-->
             </q-img>
             <q-card-section class="text-center">
-              <div class="text-h6">아메리카노[ICE]</div>
-              <b class="text-accent" style="font-size: 1.2em">1200원</b>
+              <div class="text-h6">{{ subMenu.name}}</div>
+              <b class="text-accent" style="font-size: 1.2em">{{ subMenu.price}}원</b>
             </q-card-section>
           </q-card>
           </div>
-        </q-tab-panel>
-
-        <q-tab-panel name="drink">
-          <div class="text-h6">drink</div>
-        </q-tab-panel>
-
-        <q-tab-panel name="dessert">
-          <div class="text-h6">dessert</div>
-        </q-tab-panel>
-
-        <q-tab-panel name="etc">
-          <div class="text-h6">etc</div>
         </q-tab-panel>
       </q-tab-panels>
 <!--      <router-view />-->
@@ -103,6 +89,20 @@ export default {
           {id: 'test1', name: '카페라떼[ICE]',qty: '1'},
           {id: 'test2', name: '아이스초코[ICE]', qty: '2'}
       ],
+      menu1Levels: [
+        {id: '1', name: 'coffee', icon: 'coffee', label: '커피'},
+        {id: '2', name: 'drink', icon: 'local_drink', label: '음료'},
+        {id: '3', name: 'dessert', icon: 'icecream', label: '디저트'},
+        {id: '4', name: 'etc', icon: 'more_horiz', label: '기타'}
+      ],
+      menu2Levels: [
+        {parentId: '1', id: '1_1', name: '아메리카노[ICE]', price: '1500'},
+        {parentId: '1', id: '1_2', name: '아메리카노[HOT]', price: '1000'},
+        {parentId: '2', id: '2_1', name: '레몬에이드[ICE]', price: '2000'},
+        {parentId: '2', id: '2_2', name: '유자차[HOT]', price: '1800'},
+        {parentId: '3', id: '3_1', name: '치즈케이크', price: '3500'},
+        {parentId: '3', id: '3_2', name: '샌드위치', price: '3000'}
+      ],
       tab: ref('coffee'),
       rightDrawerOpen,
       toggleRightDrawer () {
@@ -129,7 +129,7 @@ export default {
 
 .my-card {
   width: 100%;
-  max-width: 170px;
+  max-width: 200px;
   cursor: pointer;
 }
 
