@@ -116,12 +116,12 @@ export default {
 }
 </script>
 
-<style lang="scss">
-.q-tab__label {
+<style lang="scss" scoped>
+::v-deep .q-tab__label {
   font-size: 1.8em;
 }
 
-.q-tab__icon {
+::v-deep .q-tab__icon {
   width: 45px;
   height: 40px;
   font-size: 45px;
