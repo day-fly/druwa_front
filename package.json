@@ -11,7 +11,8 @@
     "@quasar/extras": "^1.0.0",
     "core-js": "^3.8.3",
     "quasar": "^2.0.0",
-    "vue": "^3.2.13"
+    "vue": "^3.2.13",
+    "vue-router": "4"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
@@ -37,7 +38,12 @@
     "parserOptions": {
       "parser": "@babel/eslint-parser"
     },
-    "rules": {}
+    "rules": {
+      "vue/multi-word-component-names": ["error", {
+        "ignores": ["Order","order"]
+
+      }]
+    }
   },
   "browserslist": [
     "> 1%",

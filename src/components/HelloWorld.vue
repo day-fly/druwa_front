@@ -1,6 +1,6 @@
 <template>
   <q-page class="flex flex-center">
-    <img alt="Quasar logo" src="../assets/logo.svg" style="width: 200px; height: 200px">
+    안녕하세요. 얼굴인식을 진행해 주세요.
   </q-page>
 </template>
 
