@@ -1,14 +1,20 @@
-<template>
+﻿<template>
   <q-layout view="hHh lpR fFf">
-    <q-header class="bg-black text-white">
-      101동 1402호 김현구님 환영합니다.
+    <q-header class="bg-black text-white text-h4  text-bold text-center" style="min-height:100px">
+      &nbsp;&nbsp;101동 1402호 김현구님 환영합니다.
     </q-header>
 
     <q-drawer behavior="desktop"
               :show-if-above="true" side="right" bordered :width="400">
       <!-- drawer content -->
       <div class="q-pa-md" style="max-width: 400px">
+	<div align="center">
+        <q-btn class="glossy text-h4 text-weight-bold" rounded color="deep-orange" label="주문" style="height: 50px;min-width: 150px" @click="confirmOrder"></q-btn>&nbsp;&nbsp;
+        <q-btn class="glossy text-h4 text-weight-bold" rounded color="grey" label="취소" style="height: 50px;min-width: 150px"></q-btn>
+	</div>
+	<br>
         <q-toolbar class="bg-black text-white shadow-2 glossy">
+
           <q-toolbar-title>주문목록</q-toolbar-title>
         </q-toolbar>
 
@@ -45,10 +51,22 @@
       >
 
         <template v-for="menu in menu1Levels" :key="menu.id">
-          <q-tab class="bg-purple-9" :name="menu.name" :icon="menu.icon" :label="menu.label"></q-tab>
+          <q-tab :class="menu.class" :name="menu.name" :icon="menu.icon" :label="menu.label"></q-tab>
         </template>
-
       </q-tabs>
+
+      <q-tabs
+          v-model="tab"
+          indicator-color="black"
+          class="bg-purple-9 text-white shadow-2"
+          dense
+          align="justify"
+      >
+        <template v-for="menu in menu1Levels_2" :key="menu.id">
+          <q-tab :class="menu.class" :name="menu.name" :icon="menu.icon" :label="menu.label"></q-tab>
+        </template>
+</q-tabs>
+
 
       <q-tab-panels v-model="tab" animated>
         <q-tab-panel v-for="menu in menu1Levels" :name="menu.name" :key="menu.id">
@@ -70,13 +88,6 @@
       <!--      <router-view />-->
     </q-page-container>
 
-    <q-footer elevated class="bg-black text-white" style="height: 100px">
-
-      <div class="text-center div-vertical-center">
-        <q-btn class="glossy text-h5 text-weight-bold" rounded color="deep-orange" label="주문" style="height: 50px;min-width: 150px" @click="confirmOrder"></q-btn>&nbsp;&nbsp;
-        <q-btn class="glossy text-h5 text-weight-bold" rounded color="grey" label="취소" style="height: 50px;min-width: 150px"></q-btn>
-      </div>
-    </q-footer>
 
   </q-layout>
 
@@ -127,14 +138,22 @@ export default {
       showAlert: false,
       orders: [],
       menu1Levels: [
-        {id: '1', name: 'coffee', icon: 'coffee', label: '커피'},
-        {id: '2', name: 'drink', icon: 'local_drink', label: '음료'},
-        {id: '3', name: 'dessert', icon: 'icecream', label: '디저트'},
-        {id: '4', name: 'etc', icon: 'more_horiz', label: '기타'}
+        {id: '1', name: 'coffee', icon: 'coffee', label: '커피', class:'bg-purple text-h5'},
+        {id: '2', name: 'drink', icon: 'local_drink', label: '음료', class:'bg-green text-h5'},
+        {id: '3', name: 'dessert', icon: 'icecream', label: '디저트', class:'bg-yellow text-h5'},
+        {id: '4', name: 'etc', icon: 'more_horiz', label: '기타', class:'bg-blue text-h5'}
+      ],
+      menu1Levels_2: [
+        {id: '1', name: 'coffee', icon: 'coffee', label: '커피', class:'bg-red text-h5'},
+        {id: '2', name: 'drink', icon: 'local_drink', label: '음료', class:'bg-orange text-h5'},
+        {id: '3', name: 'dessert', icon: 'icecream', label: '디저트', class:'bg-amber text-h5'},
+        {id: '4', name: 'etc', icon: 'more_horiz', label: '기타', class:'bg-pink text-h5'}
       ],
       menu2Levels: [
         {parentId: '1', id: '1_1', name: '아메리카노[ICE]', price: '1500'},
         {parentId: '1', id: '1_2', name: '카라멜마끼아또[HOT]', price: '1000'},
+        {parentId: '1', id: '1_3', name: 'test[HOT]', price: '1000'},
+        {parentId: '1', id: '1_4', name: 'test2[HOT]', price: '1000'},
         {parentId: '2', id: '2_1', name: '레몬에이드[ICE]', price: '2000'},
         {parentId: '2', id: '2_2', name: '유자차[HOT]', price: '1800'},
         {parentId: '3', id: '3_1', name: '치즈케이크', price: '3500'},
@@ -200,7 +219,8 @@ export default {
 
 .my-card {
   width: 100%;
-  max-width: 150px;
+  max-width: 194px;
+  min-height: 317px;
   cursor: pointer;
 }
 
