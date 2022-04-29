@@ -27,7 +27,7 @@
           <div class="q-pa-md row items-start q-gutter-md">
           <q-card class="my-card">
             <q-card-section class="bg-yellow-4 text-black">
-              <div class="text-subtitle1 text-center text-bold">108동 1402호 김현구</div>
+              <div class="text-subtitle1 text-center text-bold">108-1402 김현구</div>
               <div class="text-subtitle2 text-center">4/26 11:00:03</div>
             </q-card-section>
 
@@ -51,15 +51,16 @@
 
           <q-card class="my-card">
             <q-card-section class="bg-yellow-4 text-black">
-              <div class="text-subtitle1 text-center text-bold">202동 1102호 장혜성</div>
+              <div class="text-subtitle1 text-center text-bold">202-1102 장혜성</div>
               <div class="text-subtitle2 text-center">4/26 11:02:00</div>
             </q-card-section>
 
             <q-separator></q-separator>
 
             <q-card-actions vertical>
-              <q-btn flat>아메리카노[ICE] 1</q-btn>
-              <q-btn flat>카페라떼[HOT] 2</q-btn>
+              <q-btn flat>레몬에이드[ICE]<q-space/><b>1</b></q-btn>
+              <q-btn flat>유자에이드[ICE]<q-space/><b>1</b></q-btn>
+              <q-btn flat>녹차[ICE]<q-space/><b>1</b></q-btn>
             </q-card-actions>
 
             <div class="text-center div-vertical-center">
@@ -69,6 +70,24 @@
             <div>&nbsp;</div>
           </q-card>
 
+            <q-card class="my-card">
+              <q-card-section class="bg-yellow-4 text-black">
+                <div class="text-subtitle1 text-center text-bold">202-1102 장혜성</div>
+                <div class="text-subtitle2 text-center">4/26 11:02:00</div>
+              </q-card-section>
+
+              <q-separator></q-separator>
+
+              <q-card-actions vertical>
+                <q-btn flat>레몬에이드[ICE]<q-space/><b>3</b></q-btn>
+              </q-card-actions>
+
+              <div class="text-center div-vertical-center">
+                <q-btn class="glossy text-subtitle1" color="purple-9" label="완료" style="height: 20px;"></q-btn>&nbsp;&nbsp;
+                <q-btn class="glossy text-subtitle1" color="grey" label="취소"></q-btn>
+              </div>
+              <div>&nbsp;</div>
+            </q-card>
 
           </div>
         </q-tab-panel>

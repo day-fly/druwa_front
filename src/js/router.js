@@ -6,15 +6,22 @@ const routes = [
         component : () => import('@/components/HelloWorld')
     },
     {
+        path: '/bye',
+        component : () => import('@/components/ByeWorld')
+    },
+    {
         path: '/order',
+        name: 'order',
         component : () => import('@/components/Order')
     },
     {
         path: '/processOrder',
+        name: 'processOrder',
         component : () => import('@/components/ProcessOrder')
     },
     {
         path: '/manageOrder',
+        name: 'manageOrder',
         component : () => import('@/components/ManageOrder')
     },
 ]

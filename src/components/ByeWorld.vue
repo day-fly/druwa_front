@@ -1,8 +1,7 @@
 <template>
   <q-page class="flex flex-center">
     <div class="text-h4 text-purple text-bold">
-      안녕하세요. 안면인식을 해주세요.
-      <q-linear-progress indeterminate color="warning"></q-linear-progress>
+      주문이 완료되었습니다. 감사합니다.
     </div>
   </q-page>
 </template>
@@ -18,7 +17,7 @@ export default {
   },
   mounted() {
     //test
-    setTimeout(() => this.$router.push('order'), 2000)
+    setTimeout(() => this.$router.push('/'), 2000)
   },
   methods() {
 

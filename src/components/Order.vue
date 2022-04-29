@@ -1,29 +1,33 @@
 <template>
   <q-layout view="hHh lpR fFf">
-
     <q-header class="bg-black text-white">
       101동 1402호 김현구님 환영합니다.
     </q-header>
 
     <q-drawer behavior="desktop"
-              :show-if-above="true" v-model="rightDrawerOpen" side="right" bordered :width="350">
+              :show-if-above="true" side="right" bordered :width="400">
       <!-- drawer content -->
-      <div class="q-pa-md" style="max-width: 350px">
+      <div class="q-pa-md" style="max-width: 400px">
         <q-toolbar class="bg-black text-white shadow-2 glossy">
           <q-toolbar-title>주문목록</q-toolbar-title>
         </q-toolbar>
 
         <q-list bordered>
           <q-item v-for="order in orders" :key="order.id" class="q-my-sm" clickable v-ripple>
+            <q-item-section avatar>
+              <q-btn color="black" text-color="white" push label="X" style="font-size: 1.2em" @click="deleteOrder(order)"></q-btn>
+            </q-item-section>
             <q-item-section>
-              <q-item-label class="text-h6">{{ order.name }}</q-item-label>
+              <q-item-label style="font-size: 1.2em">{{ order.name }}</q-item-label>
               <q-item-label style="font-size: 1.2em" caption lines="1">주문수량 : <b class="text-accent">{{ order.qty }}</b></q-item-label>
             </q-item-section>
             <q-item-section side>
               <q-btn-group push>
-                <q-btn color="white" text-color="black" push label="+" style="font-size: 1.5em"></q-btn>
-                <q-btn color="grey-4" text-color="black" push label="-" style="font-size: 1.5em"></q-btn>
+                <q-btn color="white" text-color="black" push label="+" style="font-size: 1.5em" @click="addQty(order)"></q-btn>
+                <q-btn color="grey-4" text-color="black" push label="-" style="font-size: 1.5em" @click="minusQty(order)"></q-btn>
+<!--                <q-btn color="red" text-color="white" push label="X" style="font-size: 1.2em" @click="minusQty(order)"></q-btn>-->
               </q-btn-group>
+
             </q-item-section>
           </q-item>
           <q-separator></q-separator>
@@ -49,7 +53,7 @@
       <q-tab-panels v-model="tab" animated>
         <q-tab-panel v-for="menu in menu1Levels" :name="menu.name" :key="menu.id">
           <div class="q-pa-md row items-start q-gutter-md">
-            <q-card v-for="subMenu in menu2Levels.filter((obj) => obj.parentId === menu.id)" :key="subMenu.id" class="my-card" @click="selectMenu">
+            <q-card v-for="subMenu in menu2Levels.filter((obj) => obj.parentId === menu.id)" :key="subMenu.id" class="my-card" @click="selectMenu(subMenu)">
               <q-img src="../images/coffee.jpg">
                 <!--              <div class="absolute-bottom text-weight-bolder">-->
                 <!--                아메리카노[ICE]-->
@@ -69,27 +73,59 @@
     <q-footer elevated class="bg-black text-white" style="height: 100px">
 
       <div class="text-center div-vertical-center">
-        <q-btn class="glossy text-h5 text-weight-bold" rounded color="deep-orange" label="주문" style="height: 50px;min-width: 150px"></q-btn>&nbsp;&nbsp;
+        <q-btn class="glossy text-h5 text-weight-bold" rounded color="deep-orange" label="주문" style="height: 50px;min-width: 150px" @click="confirmOrder"></q-btn>&nbsp;&nbsp;
         <q-btn class="glossy text-h5 text-weight-bold" rounded color="grey" label="취소" style="height: 50px;min-width: 150px"></q-btn>
       </div>
     </q-footer>
 
   </q-layout>
+
+  <q-dialog v-model="showConfirmOrders">
+    <q-card>
+      <q-card-section class="bg-purple-9 text-white">
+        <div class="text-h6 text-bold">주문을 확인해주세요</div>
+      </q-card-section>
+
+      <q-separator></q-separator>
+
+      <q-list bordered separator>
+        <q-item v-for="n in orders" :key="n.id">
+          <q-item-section class="text-h6">{{n.name}}</q-item-section>
+          <q-item-section class="text-h6" side>{{n.qty}}</q-item-section>
+        </q-item>
+      </q-list>
+
+      <q-separator></q-separator>
+
+      <q-card-actions align="right">
+        <q-btn style="width:150px" class="text-h6 text-bold" label="완료" color="deep-orange" @click="completeOrders"></q-btn>
+        <q-btn style="width:150px" class="text-h6 text-bold" label="취소" color="grey" v-close-popup></q-btn>
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
+  <q-dialog v-model="showAlert">
+    <q-card>
+      <q-card-section class="bg-purple-9 text-white">
+        <div class="text-h6 text-bold">주문할 메뉴를 선택하세요.</div>
+      </q-card-section>
+
+      <q-card-actions align="center">
+        <q-btn style="width:150px" class="text-h6 text-bold" label="확인" color="deep-orange" v-close-popup></q-btn>
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script>
 import { ref } from 'vue'
-
 export default {
   name: 'order',
-  setup () {
-    const rightDrawerOpen = ref(false)
-
+  data() {
     return {
-      orders: [
-        {id: 'test1', name: '카페라떼[ICE]',qty: '1'},
-        {id: 'test2', name: '아이스초코[ICE]', qty: '2'}
-      ],
+      showConfirmOrders: false,
+      showAlert: false,
+      orders: [],
       menu1Levels: [
         {id: '1', name: 'coffee', icon: 'coffee', label: '커피'},
         {id: '2', name: 'drink', icon: 'local_drink', label: '음료'},
@@ -98,20 +134,54 @@ export default {
       ],
       menu2Levels: [
         {parentId: '1', id: '1_1', name: '아메리카노[ICE]', price: '1500'},
-        {parentId: '1', id: '1_2', name: '아메리카노[HOT]', price: '1000'},
+        {parentId: '1', id: '1_2', name: '카라멜마끼아또[HOT]', price: '1000'},
         {parentId: '2', id: '2_1', name: '레몬에이드[ICE]', price: '2000'},
         {parentId: '2', id: '2_2', name: '유자차[HOT]', price: '1800'},
         {parentId: '3', id: '3_1', name: '치즈케이크', price: '3500'},
         {parentId: '3', id: '3_2', name: '샌드위치', price: '3000'}
-      ],
-      tab: ref('coffee'),
-      rightDrawerOpen,
-      toggleRightDrawer () {
-        rightDrawerOpen.value = !rightDrawerOpen.value
-      },
-      selectMenu(){
-        alert('test')
+      ]
+    }
+  },
+  methods: {
+    confirmOrder(){
+      if(this.orders.length === 0){
+        this.showAlert = true
+        return
       }
+      this.showConfirmOrders = true
+    },
+    selectMenu(menu){
+      const existOrder = this.orders.find(c => c.id === menu.id);
+      console.log(existOrder)
+      if(!existOrder){
+        const order = Object.assign({}, menu)
+        order.qty = 1
+        this.orders.push(order)
+      }else{
+        existOrder.qty += 1
+      }
+    },
+    addQty(order){
+      console.log('addQty')
+      order.qty += 1
+    },
+    minusQty(order){
+      console.log('minusQty')
+      if(order.qty > 1){
+        order.qty -= 1
+      }
+    },
+    deleteOrder(order){
+      const orders = this.orders.filter((obj) => order.id !== obj.id)
+      this.orders = orders
+    },
+    completeOrders(){
+      this.$router.push('/bye')
+    }
+  },
+  setup () {
+    return {
+      tab: ref('coffee'),
     }
   }
 }
@@ -130,7 +200,7 @@ export default {
 
 .my-card {
   width: 100%;
-  max-width: 200px;
+  max-width: 150px;
   cursor: pointer;
 }
 
