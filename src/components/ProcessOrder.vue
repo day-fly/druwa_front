@@ -23,88 +23,33 @@
       <q-tab-panels v-model="tab" animated>
         <q-tab-panel name="current">
           <div class="q-pa-md row items-start q-gutter-md">
-            <q-card class="my-card">
+            <q-card v-for="order in orderList" class="my-card" :key="order.id">
               <q-card-section class="bg-yellow-4 text-black">
-                <div class="text-subtitle1 text-center text-bold">108-1402 김현구</div>
-                <div class="text-subtitle2 text-center">4/26 11:00:03</div>
+                <div class="text-subtitle1 text-center text-bold">
+                  {{ order.orderDong }}-{{ order.orderHo }}&nbsp;{{ order.orderName }}
+                </div>
+                <div class="text-subtitle2 text-center">
+                  {{ order.orderDate.substring(0, order.orderDate.indexOf(".")).replace("T", " ") }}
+                </div>
               </q-card-section>
 
               <q-separator></q-separator>
 
               <q-card-actions vertical>
-                <q-btn flat>아메리카노[ICE]
+                <q-btn v-for="menu of order.cafeOrderProductList" flat :key="menu.id">
+                  {{ menu.orderMenuName }}
                   <q-space/>
-                  <b>1</b></q-btn>
-                <q-btn flat>카라멜마끼아또[ICE]
-                  <q-space/>
-                  <b>2</b></q-btn>
-                <q-btn flat>카페라떼[ICE]
-                  <q-space/>
-                  <b>1</b></q-btn>
-                <q-btn flat>레모네이드[ICE]
-                  <q-space/>
-                  <b>1</b></q-btn>
-                <q-btn flat>딸기바나나[ICE]
-                  <q-space/>
-                  <b>3</b></q-btn>
+                  <b>{{ menu.orderMenuCount }}</b>
+                </q-btn>
               </q-card-actions>
 
               <div class="text-center div-vertical-center">
-                <q-btn class="glossy text-subtitle1" color="purple-9" label="완료" style="height: 20px;"></q-btn>&nbsp;&nbsp;
-                <q-btn class="glossy text-subtitle1" color="grey" label="취소"></q-btn>
+                <q-btn class="glossy text-subtitle1" color="purple-9" label="완료" style="height: 20px;" @click="complete(order)"></q-btn>&nbsp;&nbsp;
+                <q-btn class="glossy text-subtitle1" color="grey" label="취소" @click="cancel(order)"></q-btn>
               </div>
               <div>&nbsp;</div>
 
             </q-card>
-
-            <q-card class="my-card">
-              <q-card-section class="bg-yellow-4 text-black">
-                <div class="text-subtitle1 text-center text-bold">202-1102 장혜성</div>
-                <div class="text-subtitle2 text-center">4/26 11:02:00</div>
-              </q-card-section>
-
-              <q-separator></q-separator>
-
-              <q-card-actions vertical>
-                <q-btn flat>레몬에이드[ICE]
-                  <q-space/>
-                  <b>1</b></q-btn>
-                <q-btn flat>유자에이드[ICE]
-                  <q-space/>
-                  <b>1</b></q-btn>
-                <q-btn flat>녹차[ICE]
-                  <q-space/>
-                  <b>1</b></q-btn>
-              </q-card-actions>
-
-              <div class="text-center div-vertical-center">
-                <q-btn class="glossy text-subtitle1" color="purple-9" label="완료" style="height: 20px;"></q-btn>&nbsp;&nbsp;
-                <q-btn class="glossy text-subtitle1" color="grey" label="취소"></q-btn>
-              </div>
-              <div>&nbsp;</div>
-            </q-card>
-
-            <q-card class="my-card">
-              <q-card-section class="bg-yellow-4 text-black">
-                <div class="text-subtitle1 text-center text-bold">202-1102 장혜성</div>
-                <div class="text-subtitle2 text-center">4/26 11:02:00</div>
-              </q-card-section>
-
-              <q-separator></q-separator>
-
-              <q-card-actions vertical>
-                <q-btn flat>레몬에이드[ICE]
-                  <q-space/>
-                  <b>3</b></q-btn>
-              </q-card-actions>
-
-              <div class="text-center div-vertical-center">
-                <q-btn class="glossy text-subtitle1" color="purple-9" label="완료" style="height: 20px;"></q-btn>&nbsp;&nbsp;
-                <q-btn class="glossy text-subtitle1" color="grey" label="취소"></q-btn>
-              </div>
-              <div>&nbsp;</div>
-            </q-card>
-
           </div>
         </q-tab-panel>
 
@@ -113,16 +58,15 @@
             <q-table
                 class="my-sticky-header-table"
                 title="주문내역"
-                :rows="data"
+                :rows="orderList"
                 :columns="columns"
-                row-key="name"
                 bordered
                 :pagination=pagination
             >
               <template v-slot:body="props">
                 <q-tr :props="props">
                   <q-td key="name" :props="props" class="text-bold">
-                    {{ props.row.name }}
+                    {{ props }}
                   </q-td>
                   <q-td key="orders" :props="props">
                     {{ props.row.orders }}
@@ -145,33 +89,71 @@
 </template>
 
 <script>
+
 import {ref} from 'vue'
+import axios from "axios";
+import {useQuasar} from "quasar";
 
 export default {
   name: 'processOrder',
-  setup() {
+  data() {
     return {
+      interval: undefined,
+      $q: useQuasar(),
       pagination: {
         rowsPerPage: 10 // current rows per page being displayed
       },
       columns: [
-        {name: 'name', align: 'left', label: '이름', field: 'name'},
+        {name: 'orderName', align: 'left', label: '이름', field: 'orderName'},
         {name: 'orders', align: 'left', label: '주문', field: 'orders'},
         {name: 'status', align: 'left', label: '상태', field: 'status'},
         {name: 'reset', align: 'center', label: '복원', field: 'reset'},
       ],
-      data: [
-        {name: 'test', orders: '아메리카노[ICE] 2, 카페라떼[ICE] 1, 레모네이드[ICE] 1, 녹차[ICE] 4', status: '완료'},
-        {name: 'test', orders: '아메리카노[ICE] 2, 카페라떼[ICE] 1, 레모네이드[ICE] 1, 녹차[ICE] 4', status: '취소'},
-        {name: 'test', orders: '아메리카노[ICE] 2, 카페라떼[ICE] 1, 레모네이드[ICE] 1, 녹차[ICE] 4', status: '완료'},
-        {name: 'test', orders: '아메리카노[ICE] 2, 카페라떼[ICE] 1, 레모네이드[ICE] 1, 녹차[ICE] 4', status: '완료'},
-        {name: 'test', orders: '아메리카노[ICE] 2, 카페라떼[ICE] 1, 레모네이드[ICE] 1, 녹차[ICE] 4', status: '완료'},
-        {name: 'test', orders: '아메리카노[ICE] 2, 카페라떼[ICE] 1, 레모네이드[ICE] 1, 녹차[ICE] 4', status: '완료'}
-      ],
+      orderList: [],
+    }
+  },
+  created() {
+    //this.getOrderList()
+    this.interval = setInterval(() => this.getOrderList(), 5000)
+  },
+  methods: {
+    complete(order) {
+      axios.post(
+          'http://localhost:5001/java/order/complete/'+order.id
+      ).then(() => {
+        this.getOrderList()
+      }).catch(() => {
+
+      })
+    },
+    cancel(order) {
+      axios.post(
+          'http://localhost:5001/java/order/cancel/'+order.id
+      ).then(() => {
+        this.getOrderList()
+      }).catch(() => {
+
+      })
+
+    },
+    async getOrderList() {
+      await console.log('test')
+      //this.$q.loading.show()
+      await axios
+          .get('http://localhost:5001/java/order/list')
+          .then(response => {
+            //this.$q.loading.hide()
+            this.orderList = response.data.filter((obj) => obj.orderState === 'WAIT')
+            //console.log(response)
+          }).catch(() => {
+            //this.$q.loading.hide()
+            this.$router.push('/error')
+      })
+    }
+  },
+  setup() {
+    return {
       tab: ref('current'),
-      selectMenu() {
-        alert('test')
-      }
     }
   }
 }

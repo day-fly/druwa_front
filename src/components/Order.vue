@@ -1,6 +1,6 @@
 ﻿<template>
   <q-layout view="hHh lpR fFf">
-    <q-header class="bg-brown text-white text-h4 text-bold row items-center justify-center" style="min-height:100px">
+    <q-header class="bg-brown-7 text-white text-h4 text-bold row items-center justify-center" style="min-height:100px">
       &nbsp;&nbsp;{{ userDong }}동 {{ userHo }}호 {{ userName }}님 환영합니다.
     </q-header>
 
@@ -80,7 +80,7 @@
 
       <q-tab-panels v-model="tab" animated>
         <q-tab-panel v-for="menu in menu1Levels" :name="menu.menuName" :key="menu.id">
-          <q-toolbar class="bg-black text-white">
+          <q-toolbar class="bg-brown text-white">
             <q-toolbar-title clas="text-h6 text-bold">{{ menu.menuName }}</q-toolbar-title>
           </q-toolbar>
           <div class="q-pa-md row items-start q-gutter-md">
@@ -100,7 +100,7 @@
 
   <q-dialog v-model="showConfirmOrders">
     <q-card>
-      <q-card-section class="bg-purple-9 text-white">
+      <q-card-section class="bg-brown text-white">
         <div class="text-h6 text-bold">주문을 확인해주세요</div>
       </q-card-section>
 
@@ -139,6 +139,7 @@
 <script>
 import {ref} from 'vue'
 import axios from "axios";
+import {useQuasar} from 'quasar'
 
 export default {
   name: 'order',
@@ -149,6 +150,7 @@ export default {
   },
   data() {
     return {
+      $q: useQuasar(),
       showConfirmOrders: false,
       showAlert: false,
       orders: [],
@@ -159,7 +161,7 @@ export default {
         'rgb(215, 128, 18)',
         'rgb(166, 12, 34)',
         'rgb(63, 8, 24)',
-        'rgb(250, 217, 20)',
+        'rgb(250, 207, 20)',
 
         'rgb(93, 190, 165)',
         'rgb(242, 157, 17)',
@@ -169,6 +171,7 @@ export default {
     }
   },
   created() {
+    this.$q.loading.show()
     axios
         .get('http://localhost:5001/java/menu/list')
         .then(response => {
@@ -178,11 +181,20 @@ export default {
           menu1Levels.sort((a, b) => (a.menuIndex > b.menuIndex ? 1 : -1))
           this.menu1Levels = menu1Levels
           this.menu2Levels = menu2Levels
+          this.$q.loading.hide()
         })
   },
   methods: {
     cancelOrder(){
-      this.$router.push('/')
+      axios.post(
+          'http://localhost:5001/java/order/cancel'
+      ).then(() => {
+        this.$q.loading.hide()
+        this.$router.push('/')
+      }).catch(() => {
+        this.$q.loading.hide()
+        this.$router.push('/error')
+      })
     },
     confirmOrder() {
       if (this.orders.length === 0) {
@@ -219,6 +231,11 @@ export default {
     },
     completeOrders() {
 
+      if(!this.userName){
+        this.$router.push('/')
+        return
+      }
+
       let orderProducts = []
       this.orders.forEach((obj) => {
         orderProducts.push({
@@ -229,6 +246,7 @@ export default {
         })
       })
 
+      this.$q.loading.show()
       axios.post(
           'http://localhost:5001/java/order/',
           {
@@ -238,8 +256,10 @@ export default {
             "orderProducts": orderProducts
           }
       ).then(() => {
+        this.$q.loading.hide()
         this.$router.push('/bye')
       }).catch(() => {
+        this.$q.loading.hide()
         this.$router.push('/error')
       })
     },
