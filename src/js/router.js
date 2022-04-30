@@ -10,9 +10,14 @@ const routes = [
         component : () => import('@/components/ByeWorld')
     },
     {
+        path: '/error',
+        component : () => import('@/components/ErrorWorld')
+    },
+    {
         path: '/order',
         name: 'order',
-        component : () => import('@/components/Order')
+        component : () => import('@/components/Order'),
+        props: true
     },
     {
         path: '/processOrder',
