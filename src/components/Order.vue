@@ -60,8 +60,8 @@
       >
 
         <template v-for="(menu,index) in menu1Levels.slice(0,4)" :key="menu.id">
-          <q-tab class="text-bold text-h6" :name="menu.menuName" :label="menu.menuName"
-                 :style="`background-color:${colorRgbList[index]}`"></q-tab>
+          <q-tab class="text-bold text-h5" :name="menu.menuName" :label="menu.menuName"
+                 :style="`background-color:${colorRgbList[index]}`" style="min-height: 100px;"></q-tab>
         </template>
       </q-tabs>
 
@@ -73,8 +73,8 @@
           align="justify"
       >
         <template v-for="(menu,index) in menu1Levels.slice(4,8)" :key="menu.id">
-          <q-tab class="text-bold text-h6" :name="menu.menuName" :label="menu.menuName"
-                 :style="`background-color:${colorRgbList[index+4]}`"></q-tab>
+          <q-tab class="text-bold text-h5" :name="menu.menuName" :label="menu.menuName"
+                 :style="`background-color:${colorRgbList[index+4]}`" style="min-height: 100px;"></q-tab>
         </template>
       </q-tabs>
 
@@ -188,9 +188,9 @@ export default {
     cancelOrder(){
       axios.post(
           'http://localhost:5001/java/order/cancel'
-      ).then(() => {
+      ).then(async () => {
         this.$q.loading.hide()
-        this.$router.push('/')
+        await this.$router.push('/bye')
       }).catch(() => {
         this.$q.loading.hide()
         this.$router.push('/error')
@@ -255,9 +255,9 @@ export default {
             "orderHo": this.userHo,
             "orderProducts": orderProducts
           }
-      ).then(() => {
+      ).then(async () => {
         this.$q.loading.hide()
-        this.$router.push('/bye')
+        await this.$router.push('/bye')
       }).catch(() => {
         this.$q.loading.hide()
         this.$router.push('/error')

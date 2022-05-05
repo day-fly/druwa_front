@@ -6,6 +6,10 @@ const routes = [
         component : () => import('@/components/HelloWorld')
     },
     {
+        path: '/cert',
+        component : () => import('@/components/Cert')
+    },
+    {
         path: '/bye',
         component : () => import('@/components/ByeWorld')
     },

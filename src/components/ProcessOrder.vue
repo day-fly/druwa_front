@@ -23,6 +23,7 @@
       <q-tab-panels v-model="tab" animated>
         <q-tab-panel name="current">
           <div class="q-pa-md row items-start q-gutter-md">
+            <template v-if="orderList.length > 0">
             <q-card v-for="order in orderList" class="my-card" :key="order.id">
               <q-card-section class="bg-yellow-4 text-black">
                 <div class="text-subtitle1 text-center text-bold">
@@ -48,8 +49,11 @@
                 <q-btn class="glossy text-subtitle1" color="grey" label="취소" @click="cancel(order)"></q-btn>
               </div>
               <div>&nbsp;</div>
-
             </q-card>
+            </template>
+            <template v-else>
+              현재 주문이 없습니다.
+            </template>
           </div>
         </q-tab-panel>
 
@@ -58,25 +62,27 @@
             <q-table
                 class="my-sticky-header-table"
                 title="주문내역"
-                :rows="orderList"
+                :rows="prevOrderList"
                 :columns="columns"
                 bordered
                 :pagination=pagination
             >
               <template v-slot:body="props">
                 <q-tr :props="props">
-                  <q-td key="name" :props="props" class="text-bold">
-                    {{ props }}
+                  <q-td key="orderName" :props="props" class="text-bold">
+                    {{ props.row.orderDong + '-' + props.row.orderHo + ' ' + props.row.orderName }}
+                  </q-td>
+                  <q-td key="orderDate" :props="props">
+                    {{ props.row.orderDate.substring(0, props.row.orderDate.indexOf(".")).replace("T", " ") }}
                   </q-td>
                   <q-td key="orders" :props="props">
-                    {{ props.row.orders }}
+                    {{ props.row.productListText }}
                   </q-td>
                   <q-td key="status" :props="props">
-                    {{ props.row.status }}
+                    {{ state[props.row.orderState] }}
                   </q-td>
                   <q-td key="reset" :props="props">
-                    <q-btn class="text-subtitle2 text-bold" color="purple" name="delete" label='복원'/>
-                  </q-td>
+                    <q-btn class="text-subtitle2 text-bold" color="purple" name="restore" label='복원' @click="restore(props.row)"/>                  </q-td>
                 </q-tr>
               </template>
             </q-table>
@@ -105,49 +111,87 @@ export default {
       },
       columns: [
         {name: 'orderName', align: 'left', label: '이름', field: 'orderName'},
+        {name: 'orderDate', align: 'left', label: '시간', field: 'orderDate'},
         {name: 'orders', align: 'left', label: '주문', field: 'orders'},
         {name: 'status', align: 'left', label: '상태', field: 'status'},
         {name: 'reset', align: 'center', label: '복원', field: 'reset'},
       ],
+      state: {
+        COMPLETE: '완료',
+        CANCEL: '취소',
+        WAIT: '대기'
+      },
       orderList: [],
+      prevOrderList: []
     }
   },
   created() {
-    //this.getOrderList()
-    this.interval = setInterval(() => this.getOrderList(), 5000)
+    this.getOrderList()
+    this.login()
+    //this.interval = setInterval(() => this.getOrderList(), 5000)
   },
   methods: {
     complete(order) {
-      axios.post(
+      axios.defaults.headers.post['Content-Type'] ='application/x-www-form-urlencoded';
+      axios.patch(
           'http://localhost:5001/java/order/complete/'+order.id
-      ).then(() => {
-        this.getOrderList()
+      ).then(async () => {
+        this.$q.notify({
+          message: '완료되었습니다.',
+          color: 'black'
+        })
+        await this.getOrderList()
       }).catch(() => {
 
       })
     },
     cancel(order) {
-      axios.post(
+      axios.patch(
           'http://localhost:5001/java/order/cancel/'+order.id
-      ).then(() => {
-        this.getOrderList()
+      ).then(async () => {
+        this.$q.notify({
+          message: '취소되었습니다.',
+          color: 'black'
+        })
+        await this.getOrderList()
       }).catch(() => {
 
       })
+    },
+    restore(order) {
+      console.log(order)
+      axios.patch(
+          'http://localhost:5001/java/order/restore/'+order.id
+      ).then(async () => {
+        this.$q.notify({
+          message: '복원되었습니다.',
+          color: 'black'
+        })
+        await this.getOrderList()
+      }).catch(() => {
 
+      })
     },
     async getOrderList() {
-      await console.log('test')
-      //this.$q.loading.show()
       await axios
           .get('http://localhost:5001/java/order/list')
           .then(response => {
-            //this.$q.loading.hide()
             this.orderList = response.data.filter((obj) => obj.orderState === 'WAIT')
-            //console.log(response)
+            this.prevOrderList = response.data.filter((obj) => obj.orderState !== 'WAIT')
           }).catch(() => {
-            //this.$q.loading.hide()
             this.$router.push('/error')
+      })
+    },
+    login(){
+      const eventSource = new EventSource('http://localhost:5001/java/connect')
+      const self = this
+      eventSource.addEventListener("sse", function (event) {
+        console.log(event.data);
+        if(event.data === 'NEW_ORDER'){
+          const music = new Audio('ding.wav')
+          music.play()
+          self.getOrderList()
+        }
       })
     }
   },
