@@ -10,7 +10,7 @@
 
       <q-tabs
           v-model="tab"
-          class="bg-black text-white shadow-2"
+          class="bg-black text-white shadow-2 text-h6"
           indicator-color="yellow"
           align="left"
       >
@@ -26,7 +26,7 @@
             <template v-if="orderList.length > 0">
             <q-card v-for="order in orderList" class="my-card" :key="order.id">
               <q-card-section class="bg-yellow-4 text-black">
-                <div class="text-subtitle1 text-center text-bold">
+                <div class="text-h6 text-center text-bold">
                   {{ order.orderDong }}-{{ order.orderHo }}&nbsp;{{ order.orderName }}
                 </div>
                 <div class="text-subtitle2 text-center">
@@ -37,7 +37,7 @@
               <q-separator></q-separator>
 
               <q-card-actions vertical>
-                <q-btn v-for="menu of order.cafeOrderProductList" flat :key="menu.id">
+                <q-btn class="text-h6" v-for="menu of order.cafeOrderProductList" flat :key="menu.id">
                   {{ menu.orderMenuName }}
                   <q-space/>
                   <b>{{ menu.orderMenuCount }}</b>
