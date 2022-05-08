@@ -6,6 +6,7 @@
         <q-toolbar-title>
           주문관리
         </q-toolbar-title>
+        <q-btn flat>서버상태 : {{ serverState }}</q-btn>
       </q-toolbar>
 
       <q-tabs
@@ -37,7 +38,7 @@
               <q-separator></q-separator>
 
               <q-card-actions vertical>
-                <q-btn class="text-h6" v-for="menu of order.cafeOrderProductList" flat :key="menu.id">
+                <q-btn class="text-subtitle1" v-for="menu of order.cafeOrderProductList" flat :key="menu.id">
                   {{ menu.orderMenuName }}
                   <q-space/>
                   <b>{{ menu.orderMenuCount }}</b>
@@ -45,8 +46,9 @@
               </q-card-actions>
 
               <div class="text-center div-vertical-center">
-                <q-btn class="glossy text-subtitle1" color="purple-9" label="완료" style="height: 20px;" @click="complete(order)"></q-btn>&nbsp;&nbsp;
-                <q-btn class="glossy text-subtitle1" color="grey" label="취소" @click="cancel(order)"></q-btn>
+                <q-btn class="glossy text-h6" color="purple-9" label="완료" style="width: 120px; height: 30px;" @click="complete(order)"></q-btn>&nbsp;&nbsp;
+                &nbsp;&nbsp;
+                <q-btn class="glossy text-h6" color="grey" label="취소" style="width: 80px;" @click="cancel(order)"></q-btn>
               </div>
               <div>&nbsp;</div>
             </q-card>
@@ -75,7 +77,7 @@
                   <q-td key="orderDate" :props="props">
                     {{ props.row.orderDate.substring(0, props.row.orderDate.indexOf(".")).replace("T", " ") }}
                   </q-td>
-                  <q-td key="orders" :props="props">
+                  <q-td key="orders" :props="props" style="max-width: 500px;">
                     {{ props.row.productListText }}
                   </q-td>
                   <q-td key="status" :props="props">
@@ -104,6 +106,7 @@ export default {
   name: 'processOrder',
   data() {
     return {
+      serverState: 'OFF',
       interval: undefined,
       $q: useQuasar(),
       pagination: {
@@ -126,9 +129,16 @@ export default {
     }
   },
   created() {
+    console.log('module.hot', module.hot)
+    const hotEmitter = require('webpack/hot/emitter');
+    hotEmitter.on('webpackHotUpdate', () => {
+      console.log('zzz')
+      this.getOrderList()
+      this.login()
+    });
+
     this.getOrderList()
     this.login()
-    //this.interval = setInterval(() => this.getOrderList(), 5000)
   },
   methods: {
     complete(order) {
@@ -142,7 +152,8 @@ export default {
         })
         await this.getOrderList()
       }).catch(() => {
-
+        self.serverState = 'OFF'
+        alert('서버에 접속할 수 없습니다.')
       })
     },
     cancel(order) {
@@ -155,11 +166,11 @@ export default {
         })
         await this.getOrderList()
       }).catch(() => {
-
+        self.serverState = 'OFF'
+        alert('서버에 접속할 수 없습니다.')
       })
     },
     restore(order) {
-      console.log(order)
       axios.patch(
           'http://localhost:5001/java/order/restore/'+order.id
       ).then(async () => {
@@ -176,16 +187,19 @@ export default {
       await axios
           .get('http://localhost:5001/java/order/list')
           .then(response => {
+            self.serverState = 'ON'
             this.orderList = response.data.filter((obj) => obj.orderState === 'WAIT')
             this.prevOrderList = response.data.filter((obj) => obj.orderState !== 'WAIT')
           }).catch(() => {
-            this.$router.push('/error')
+            self.serverState = 'OFF'
+            //this.$router.push('/error')
       })
     },
     login(){
       const eventSource = new EventSource('http://localhost:5001/java/connect')
       const self = this
       eventSource.addEventListener("sse", function (event) {
+        self.serverState = 'ON'
         console.log(event.data);
         if(event.data === 'NEW_ORDER'){
           const music = new Audio('ding.wav')
@@ -193,6 +207,12 @@ export default {
           self.getOrderList()
         }
       })
+      eventSource.addEventListener("error", () => {
+        self.serverState = 'OFF'
+      });
+      eventSource.addEventListener("open", () => {
+        self.serverState = 'ON'
+      });
     }
   },
   setup() {
@@ -206,7 +226,7 @@ export default {
 <style lang="scss" scoped>
 .my-card {
   width: 100%;
-  max-width: 200px;
+  max-width: 250px;
   cursor: pointer;
 }
 </style>
