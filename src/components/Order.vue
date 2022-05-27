@@ -2,7 +2,7 @@
   <q-layout view="hHh lpR fFf">
     <q-header class="bg-brown-7 text-white text-h4 text-bold row items-center justify-center" style="min-height:100px">
       &nbsp;&nbsp;{{ userDong ? userDong.replace(/.$/,"*") : ''}}동 {{ userHo ? userHo.replace(/.$/,"*") : '' }}호 {{ userName ? userName.replace(/.$/,"*") : '' }}님 환영합니다.
-      {{20-delayTime}}
+      [{{20-delayTime}} 초]
     </q-header>
 
     <q-drawer behavior="desktop"
