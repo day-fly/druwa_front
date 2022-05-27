@@ -1,7 +1,8 @@
 ﻿<template>
   <q-layout view="hHh lpR fFf">
     <q-header class="bg-brown-7 text-white text-h4 text-bold row items-center justify-center" style="min-height:100px">
-      &nbsp;&nbsp;{{ userDong }}동 {{ userHo }}호 {{ userName }}님 환영합니다.
+      &nbsp;&nbsp;{{ userDong ? userDong.replace(/.$/,"*") : ''}}동 {{ userHo ? userHo.replace(/.$/,"*") : '' }}호 {{ userName ? userName.replace(/.$/,"*") : '' }}님 환영합니다.
+      {{20-delayTime}}
     </q-header>
 
     <q-drawer behavior="desktop"
@@ -61,7 +62,7 @@
 
         <template v-for="(menu,index) in menu1Levels.slice(0,4)" :key="menu.id">
           <q-tab class="text-bold text-h5" :name="menu.menuName" :label="menu.menuName"
-                 :style="`background-color:${colorRgbList[index]}`" style="min-height: 100px;"></q-tab>
+                 :style="`background-color:${colorRgbList[index]}`" style="min-height: 100px;" @click="delayTime = 0"></q-tab>
         </template>
       </q-tabs>
 
@@ -74,7 +75,7 @@
       >
         <template v-for="(menu,index) in menu1Levels.slice(4,8)" :key="menu.id">
           <q-tab class="text-bold text-h5" :name="menu.menuName" :label="menu.menuName"
-                 :style="`background-color:${colorRgbList[index+4]}`" style="min-height: 100px;"></q-tab>
+                 :style="`background-color:${colorRgbList[index+4]}`" style="min-height: 100px;" @click="delayTime = 0"></q-tab>
         </template>
       </q-tabs>
 
@@ -88,8 +89,8 @@
                     class="my-card" @click="selectMenu(subMenu)">
               <q-img src="../images/coffee.jpg"/>
               <q-card-section class="text-center">
-                <div class="text-h6">{{ subMenu.menuName }}</div>
-                <b class="text-accent" style="font-size: 1.2em">{{ subMenu.menuCost }}원</b>
+                <b class="text-accent" style="font-size: 1.4em;">{{ subMenu.menuCost }}원</b>
+                <div style="font-size: 1.5vw;" v-html="subMenu.menuName"></div>
               </q-card-section>
             </q-card>
           </div>
@@ -137,6 +138,7 @@
 </template>
 
 <script>
+let interval
 import {ref} from 'vue'
 import axios from "axios";
 import {useQuasar} from 'quasar'
@@ -150,10 +152,12 @@ export default {
   },
   data() {
     return {
+      delayTime: 0,
       $q: useQuasar(),
       showConfirmOrders: false,
       showAlert: false,
       orders: [],
+      orderSeq: 0,
       menu1Levels: [],
       totalPrice: 0,
       menu2Levels: [],
@@ -171,9 +175,35 @@ export default {
     }
   },
   created() {
+    clearInterval(interval)
+
+    if(!this.userName){
+      this.$router.push('/')
+    }
+
+    interval = setInterval(() => {
+      this.delayTime += 1
+      if(this.delayTime > 19){
+        this.cancelOrder()
+      }
+    }, 1000)
+
+    //ctrl + 휠 금지
+    document.addEventListener(
+        'wheel',
+        function touchHandler(e) {
+          if (e.ctrlKey) {
+            e.preventDefault();
+          }
+        },
+        { passive: false }
+    )
+
+    this.getOrderList()
+
     this.$q.loading.show()
     axios
-        .get('http://localhost:5001/java/menu/list')
+        .get(`http://${this.$static.SERVER_IP}/java/menu/list`)
         .then(response => {
           const menu1Levels = response.data.filter((obj) => obj.parentId === null)
           const menu2Levels = response.data.filter((obj) => obj.parentId !== null)
@@ -185,18 +215,31 @@ export default {
         })
   },
   methods: {
+    async getOrderList() {
+      await axios
+          .get(`http://${this.$static.SERVER_IP}/java/order/list`)
+          .then(response => {
+            console.log(response.data)
+            this.orderSeq = response.data.length + 1
+            console.log('orderSeq : ', this.orderSeq)
+          }).catch(() => {
+
+          })
+    },
     cancelOrder(){
       axios.post(
-          'http://localhost:5001/java/order/cancel'
+          `http://${this.$static.SERVER_IP}/java/order/cancel`
       ).then(async () => {
+        clearInterval(interval)
         this.$q.loading.hide()
-        await this.$router.push('/bye')
+        await this.$router.push('/')
       }).catch(() => {
         this.$q.loading.hide()
         this.$router.push('/error')
       })
     },
     confirmOrder() {
+      this.delayTime = 0
       if (this.orders.length === 0) {
         this.showAlert = true
         return
@@ -204,6 +247,7 @@ export default {
       this.showConfirmOrders = true
     },
     selectMenu(menu) {
+      this.delayTime = 0
       const existOrder = this.orders.find(c => c.id === menu.id);
       if (!existOrder) {
         const order = Object.assign({}, menu)
@@ -215,22 +259,25 @@ export default {
       this.calTotalPrice()
     },
     addQty(order) {
+      this.delayTime = 0
       order.qty += 1
       this.calTotalPrice()
     },
     minusQty(order) {
+      this.delayTime = 0
       if (order.qty > 1) {
         order.qty -= 1
         this.calTotalPrice()
       }
     },
     deleteOrder(order) {
+      this.delayTime = 0
       const orders = this.orders.filter((obj) => order.id !== obj.id)
       this.orders = orders
       this.calTotalPrice()
     },
     completeOrders() {
-
+      this.delayTime = 0
       if(!this.userName){
         this.$router.push('/')
         return
@@ -248,7 +295,7 @@ export default {
 
       this.$q.loading.show()
       axios.post(
-          'http://localhost:5001/java/order/',
+              `http://${this.$static.SERVER_IP}/java/order/`,
           {
             "orderName": this.userName,
             "orderDong": this.userDong,
@@ -256,8 +303,9 @@ export default {
             "orderProducts": orderProducts
           }
       ).then(async () => {
+        clearInterval(interval)
         this.$q.loading.hide()
-        await this.$router.push('/bye')
+        await this.$router.push({name: 'bye', params: {orderSeq: this.orderSeq}})
       }).catch(() => {
         this.$q.loading.hide()
         this.$router.push('/error')

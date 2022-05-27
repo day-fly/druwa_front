@@ -11,6 +11,7 @@
 
 <script>
 let interval
+let count = 0
 import axios from "axios";
 
 export default {
@@ -19,16 +20,31 @@ export default {
     return {}
   },
   mounted() {
-    interval = setInterval(() => this.checkUser(), 2000)
+    count = 0
+    axios.post(
+        `http://${this.$static.SERVER_IP}/java/order/cancel`
+    ).then(() => {
+      clearInterval(interval)
+      interval = setInterval(() => this.checkUser(), 2000)
+      this.$q.loading.hide()
+    }).catch(() => {
+      this.$q.loading.hide()
+      this.$router.push('/error')
+    })
   },
   methods: {
     checkUser() {
+      count = count + 2
+      if(count > 15){
+        count = 0
+        clearInterval(interval)
+        this.$router.push('/')
+      }
       axios
-          .get('http://localhost:5001/java/user/')
+          .get(`http://${this.$static.SERVER_IP}/java/user/`)
           .then(response => {
             const data = response.data
             if (data.userDongHo !== null) {
-
               clearInterval(interval)
 
               this.$router.push({

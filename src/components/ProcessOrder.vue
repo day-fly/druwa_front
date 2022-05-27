@@ -28,6 +28,9 @@
             <q-card v-for="order in orderList" class="my-card" :key="order.id">
               <q-card-section class="bg-yellow-4 text-black">
                 <div class="text-h6 text-center text-bold">
+                  주문번호 : {{order.orderSeq}}
+                </div>
+                <div class="text-h6 text-center text-bold">
                   {{ order.orderDong }}-{{ order.orderHo }}&nbsp;{{ order.orderName }}
                 </div>
                 <div class="text-subtitle2 text-center">
@@ -144,7 +147,7 @@ export default {
     complete(order) {
       axios.defaults.headers.post['Content-Type'] ='application/x-www-form-urlencoded';
       axios.patch(
-          'http://localhost:5001/java/order/complete/'+order.id
+          `http://${this.$static.SERVER_IP}/java/order/complete/`+order.id
       ).then(async () => {
         this.$q.notify({
           message: '완료되었습니다.',
@@ -158,7 +161,7 @@ export default {
     },
     cancel(order) {
       axios.patch(
-          'http://localhost:5001/java/order/cancel/'+order.id
+          `http://${this.$static.SERVER_IP}/java/order/cancel/`+order.id
       ).then(async () => {
         this.$q.notify({
           message: '취소되었습니다.',
@@ -172,7 +175,7 @@ export default {
     },
     restore(order) {
       axios.patch(
-          'http://localhost:5001/java/order/restore/'+order.id
+          `http://${this.$static.SERVER_IP}/java/order/restore/`+order.id
       ).then(async () => {
         this.$q.notify({
           message: '복원되었습니다.',
@@ -185,18 +188,26 @@ export default {
     },
     async getOrderList() {
       await axios
-          .get('http://localhost:5001/java/order/list')
+          .get(`http://${this.$static.SERVER_IP}/java/order/list`)
           .then(response => {
             self.serverState = 'ON'
-            this.orderList = response.data.filter((obj) => obj.orderState === 'WAIT')
+            console.log(response)
+            this.orderList = response.data
+                .map((obj, index)=>{
+                  obj.orderSeq = index+1
+                  return obj
+                })
+                .filter((obj) => obj.orderState === 'WAIT')
+            console.log('this.orderList', this.orderList)
             this.prevOrderList = response.data.filter((obj) => obj.orderState !== 'WAIT')
+            console.log('this.prevOrderList', this.prevOrderList)
           }).catch(() => {
             self.serverState = 'OFF'
             //this.$router.push('/error')
       })
     },
     login(){
-      const eventSource = new EventSource('http://localhost:5001/java/connect')
+      const eventSource = new EventSource(`http://${this.$static.SERVER_IP}/java/connect`)
       const self = this
       eventSource.addEventListener("sse", function (event) {
         self.serverState = 'ON'

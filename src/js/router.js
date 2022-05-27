@@ -11,7 +11,9 @@ const routes = [
     },
     {
         path: '/bye',
-        component : () => import('@/components/ByeWorld')
+        name: 'bye',
+        component : () => import('@/components/ByeWorld'),
+        props: true
     },
     {
         path: '/error',
