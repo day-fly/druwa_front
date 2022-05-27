@@ -61,7 +61,7 @@
       >
 
         <template v-for="(menu,index) in menu1Levels.slice(0,4)" :key="menu.id">
-          <q-tab class="text-bold text-h5" :name="menu.menuName" :label="menu.menuName"
+          <q-tab class="text-bold text-h6" :name="menu.menuName" :label="menu.menuName"
                  :style="`background-color:${colorRgbList[index]}`" style="min-height: 100px;" @click="delayTime = 0"></q-tab>
         </template>
       </q-tabs>
@@ -74,7 +74,7 @@
           align="justify"
       >
         <template v-for="(menu,index) in menu1Levels.slice(4,8)" :key="menu.id">
-          <q-tab class="text-bold text-h5" :name="menu.menuName" :label="menu.menuName"
+          <q-tab class="text-bold text-h6" :name="menu.menuName" :label="menu.menuName"
                  :style="`background-color:${colorRgbList[index+4]}`" style="min-height: 100px;" @click="delayTime = 0"></q-tab>
         </template>
       </q-tabs>
@@ -340,8 +340,8 @@ export default {
 
 .my-card {
   width: 100%;
-  max-width: 194px;
-  min-height: 317px;
+  max-width: 140px;
+  min-height: 300px;
   cursor: pointer;
 }
 

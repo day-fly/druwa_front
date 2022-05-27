@@ -34,7 +34,7 @@
                   {{ order.orderDong }}-{{ order.orderHo }}&nbsp;{{ order.orderName }}
                 </div>
                 <div class="text-subtitle2 text-center">
-                  {{ order.orderDate.substring(0, order.orderDate.indexOf(".")).replace("T", " ") }}
+                  {{ order.orderDate.replace("T", " ") }}
                 </div>
               </q-card-section>
 
@@ -78,7 +78,7 @@
                     {{ props.row.orderDong + '-' + props.row.orderHo + ' ' + props.row.orderName }}
                   </q-td>
                   <q-td key="orderDate" :props="props">
-                    {{ props.row.orderDate.substring(0, props.row.orderDate.indexOf(".")).replace("T", " ") }}
+                    {{ props.row.orderDate.replace("T", " ") }}
                   </q-td>
                   <q-td key="orders" :props="props" style="max-width: 500px;">
                     {{ props.row.productListText }}
